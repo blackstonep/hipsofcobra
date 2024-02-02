@@ -236,14 +236,14 @@ class HipsofCobra():
       self.G_sl[1].append(gvals)
 
     # Method to extract upper- and lower- 1sigma contours of |G_P|. 
-    # Format: [ [svalue, mean, mean - 1sig, mean + 1sig], ...]
+    # Format: [ [svalue, mean, std], ...]
     self.unc_band_list = []
     for i in range(self.number_of_inds):
       _s = self.slist[i]
-      values_of_G_at_s = [self.G_sl[1][iter][i] for iter in range(self.number_of_iters)]
+      values_of_G_at_s = [abs(self.G_sl[1][iter][i]) for iter in range(self.number_of_iters)]
       _mean = np.average( values_of_G_at_s ) 
       _std  = np.std( values_of_G_at_s ) 
-      self.unc_band_list.append( [_s, _mean, _mean+_std, _mean-_std] )
+      self.unc_band_list.append( [_s, _mean, _std] )
 
   # Functions to sample Gpi and GK, which depend on the 
   # instance-specific couplings and so are worth defining in-class. 
@@ -268,15 +268,15 @@ class HipsofCobra():
     return fac1*fac2*fac3
 
   # Method to plot bundle of all the iterations. 
-  def plot_sl(self, xlim=None, ylim=None, PrintQ=True):
+  def plot_sl(self, color=None, xlim=None, ylim=None, PrintQ=True):
     if PrintQ:
       print("\n  Making scatterplot of G form factor (superlist): ")
       print("    P = ", self.Pname, ", Method = ", self.method, 
             ", clist = ", self.clist, " . . . \n")
     plt.clf()
-    plt.title(r'$G$ Form Factor for clist = ', self.clist, ' , method = ', self.method)
+    plt.title(r'$G$ Form Factor for clist = '+str(self.clist)+' , method = '+self.method)
     for iter in range(self.number_of_iters):
-      plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=None, marker='.', s=1, alpha=0.5)
+      plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=color, marker='-', s=1, alpha=0.5)
     plt.yscale('log')
     plt.xlabel(r'$s \, [{\rm GeV^2}]$') 
     if self.Pname=='pi':
@@ -291,18 +291,41 @@ class HipsofCobra():
     plt.clf()
 
   # Plot G form factor, including lower- and upper-countours. 
-  def plot_G_countours(self, xlim=None, ylim=None, PrintQ=True):
+  def plot_G_countours(self, color=None, xlim=None, ylim=None, PrintQ=True):
     if PrintQ:
-      print("\n  Making scatterplot of G form factor (contours): ")
+      print("\n  Making plot of G form factor (contours): ")
       print("    P = ", self.Pname, ", Method = ", self.method, 
             ", clist = ", self.clist, " . . . \n")
     plt.clf()
-    plt.title(r'$G$ Form Factor for clist = ', self.clist, ' , method = ', self.method)
+    mean_list = np.array( [self.unc_band_list[i][1] for i in range(self.number_of_inds) ] )
+    std_list  = np.array( [self.unc_band_list[i][2] for i in range(self.number_of_inds) ] )
+    for uncflag in [0,-1,1]:
+      plt.plot( 
+        self.slist, mean_list + uncflag*std_list,
+        c=color, alpha=0.5 
+      )
+    plt.yscale('log')
+    if self.Pname=='pi':
+      plt.title(r'$G_\pi$ Form Factor for clist = '+str(self.clist)+' , method = '+str(self.method))
+      plt.ylabel(r'$|G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
+    if self.Pname=='K':
+      plt.title(r'$G_K$ Form Factor for clist = '+str(self.clist)+' , method = '+str(self.method))
+      plt.ylabel(r'$|G_K| \, [{\rm GeV^2}]$, '+self.method) 
+    if xlim:
+      plt.xlim(xlim)
+    if ylim:
+      plt.ylim(ylim) 
+    plt.savefig('results/G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf') 
+    plt.clf()
  
 
 
   # Plot branching ratios, including lower- and upper-countours. 
 
+plist = ['pi', 'K']
+mlist = ['derived', 'direct']
 
-a = HipsofCobra([1,1,1], 'K', 'derived')  
-a.plot_sl(xlim=[0,4])
+for p in plist:
+  for m in mlist:
+    a = HipsofCobra([1,1,1], p, m)  
+    a.plot_G_countours(color='g', xlim=[0,4])
