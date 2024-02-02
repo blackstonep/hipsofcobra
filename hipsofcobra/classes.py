@@ -21,6 +21,7 @@ import numpy as np
 import sys
 import os 
 from icecream import ic
+import matplotlib.pyplot as plt
 
 rng = np.random.default_rng(seed=None)
 
@@ -149,6 +150,7 @@ class HipsofCobra():
 
     self.clist  = clist
     self.method = method 
+    self.Pname  = Pname
     self.xi_hat = self.clist[0]
     self.xi_s   = self.clist[1]
     self.xi_g   = self.clist[2]*Params.alpha**2/(3.0*np.pi*Params.beta) 
@@ -168,28 +170,30 @@ class HipsofCobra():
     with open('input/hips_d2.txt', 'r') as file:
       d2_sl = eval(file.read().replace('C', 'c') )
 
-    slist = c1_sl[0]
+    self.slist = c1_sl[0]
     number_of_inds  = len(c1_sl[0]) 
     number_of_iters = len(c1_sl[1])
+    self.number_of_inds  = number_of_inds
+    self.number_of_iters  = number_of_iters
     # Compute C and D derivatives
     c1_deriv = [ 0.5*( 
-      (c1_sl[1][iter][1]-c1_sl[1][iter][0]) / (slist[1]-slist[0]) + \
-      (c1_sl[1][iter][2]-c1_sl[1][iter][1]) / (slist[2]-slist[1])
+      (c1_sl[1][iter][1]-c1_sl[1][iter][0]) / (self.slist[1]-self.slist[0]) + \
+      (c1_sl[1][iter][2]-c1_sl[1][iter][1]) / (self.slist[2]-self.slist[1])
     ) for iter in range(number_of_iters) ]
     c2_deriv = [ 0.5*( 
-      (c2_sl[1][iter][1]-c2_sl[1][iter][0]) / (slist[1]-slist[0]) + \
-      (c2_sl[1][iter][2]-c2_sl[1][iter][1]) / (slist[2]-slist[1])
+      (c2_sl[1][iter][1]-c2_sl[1][iter][0]) / (self.slist[1]-self.slist[0]) + \
+      (c2_sl[1][iter][2]-c2_sl[1][iter][1]) / (self.slist[2]-self.slist[1])
     ) for iter in range(number_of_iters) ] 
     d1_deriv = [ 0.5*( 
-      (d1_sl[1][iter][1]-d1_sl[1][iter][0]) / (slist[1]-slist[0]) + \
-      (d1_sl[1][iter][2]-d1_sl[1][iter][1]) / (slist[2]-slist[1])
+      (d1_sl[1][iter][1]-d1_sl[1][iter][0]) / (self.slist[1]-self.slist[0]) + \
+      (d1_sl[1][iter][2]-d1_sl[1][iter][1]) / (self.slist[2]-self.slist[1])
     ) for iter in range(number_of_iters) ] 
     d2_deriv = [ 0.5*( 
-      (d2_sl[1][iter][1]-d2_sl[1][iter][0]) / (slist[1]-slist[0]) + \
-      (d2_sl[1][iter][2]-d2_sl[1][iter][1]) / (slist[2]-slist[1])
+      (d2_sl[1][iter][1]-d2_sl[1][iter][0]) / (self.slist[1]-self.slist[0]) + \
+      (d2_sl[1][iter][2]-d2_sl[1][iter][1]) / (self.slist[2]-self.slist[1])
     ) for iter in range(number_of_iters) ]
     
-    self.G_sl = [slist, []]   
+    self.G_sl = [self.slist, []]   
     for iter in range(number_of_iters):
       thetapi0_dummy = thetaPi0()
       thetaK0_dummy = thetaK0()
@@ -221,19 +225,28 @@ class HipsofCobra():
       
       if Pname=='pi':
         gvals = [
-          c1_sl[1][iter][i]*(Qpi0+slist[i]*Qpi1) +\
-          d1_sl[1][iter][i]*(QK0+slist[i]*QK1)/_npi
+          c1_sl[1][iter][i]*(Qpi0+self.slist[i]*Qpi1) +\
+          d1_sl[1][iter][i]*(QK0+self.slist[i]*QK1)/_npi
           for i in range(number_of_inds)]
       else: 
         gvals = [
-          c2_sl[1][iter][i]*(Qpi0+slist[i]*Qpi1) +\
-          d2_sl[1][iter][i]*(QK0+slist[i]*QK1)/_nK
+          c2_sl[1][iter][i]*(Qpi0+self.slist[i]*Qpi1) +\
+          d2_sl[1][iter][i]*(QK0+self.slist[i]*QK1)/_nK
           for i in range(number_of_inds)]
       self.G_sl[1].append(gvals)
 
+    # Method to extract upper- and lower- 1sigma contours of |G_P|. 
+    # Format: [ [svalue, mean, mean - 1sig, mean + 1sig], ...]
+    self.unc_band_list = []
+    for i in range(self.number_of_inds):
+      _s = self.slist[i]
+      values_of_G_at_s = [self.G_sl[1][iter][i] for iter in range(self.number_of_iters)]
+      _mean = np.average( values_of_G_at_s ) 
+      _std  = np.std( values_of_G_at_s ) 
+      self.unc_band_list.append( [_s, _mean, _mean+_std, _mean-_std] )
 
-    
-
+  # Functions to sample Gpi and GK, which depend on the 
+  # instance-specific couplings and so are worth defining in-class. 
   def Gpi0(self, MeanQ=False):
     return self.xi_g*thetaPi0(MeanQ=MeanQ)-\
       (self.xi_hat+(1.0-Params.gamma)*self.xi_g)*GammaPi0(MeanQ=MeanQ)-\
@@ -245,5 +258,51 @@ class HipsofCobra():
       (self.xi_s+(1.0-Params.gamma)*self.xi_g)*DeltaK0(MeanQ=MeanQ)
 
 
+  # Method to calculate branching ratios from values of G. 
+  def G_to_br(self, gval, s_index, daughter_mass, prefactor):
+    if self.slist[s_index] <= 4*daughter_mass**2:
+      return 0.0
+    fac1 = prefactor*Params.gf/(np.sqrt(2*self.slist[s_index])*np.pi)
+    fac2 = np.sqrt(1-4*daughter_mass**2/self.slist[s_index])
+    fac3 = abs(gval)**2
+    return fac1*fac2*fac3
+
+  # Method to plot bundle of all the iterations. 
+  def plot_sl(self, xlim=None, ylim=None, PrintQ=True):
+    if PrintQ:
+      print("\n  Making scatterplot of G form factor (superlist): ")
+      print("    P = ", self.Pname, ", Method = ", self.method, 
+            ", clist = ", self.clist, " . . . \n")
+    plt.clf()
+    plt.title(r'$G$ Form Factor for clist = ', self.clist, ' , method = ', self.method)
+    for iter in range(self.number_of_iters):
+      plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=None, marker='.', s=1, alpha=0.5)
+    plt.yscale('log')
+    plt.xlabel(r'$s \, [{\rm GeV^2}]$') 
+    if self.Pname=='pi':
+      plt.ylabel(r'$|G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
+    if self.Pname=='K':
+      plt.ylabel(r'$|G_K| \, [{\rm GeV^2}]$, '+self.method) 
+    if xlim:
+      plt.xlim(xlim)
+    if ylim:
+      plt.ylim(ylim) 
+    plt.savefig('results/scatter'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf') 
+    plt.clf()
+
+  # Plot G form factor, including lower- and upper-countours. 
+  def plot_G_countours(self, xlim=None, ylim=None, PrintQ=True):
+    if PrintQ:
+      print("\n  Making scatterplot of G form factor (contours): ")
+      print("    P = ", self.Pname, ", Method = ", self.method, 
+            ", clist = ", self.clist, " . . . \n")
+    plt.clf()
+    plt.title(r'$G$ Form Factor for clist = ', self.clist, ' , method = ', self.method)
+ 
+
+
+  # Plot branching ratios, including lower- and upper-countours. 
+
+
 a = HipsofCobra([1,1,1], 'K', 'derived')  
-ic( a.G_sl[1][1][:10] ) 
+a.plot_sl(xlim=[0,4])
