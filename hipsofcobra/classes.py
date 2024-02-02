@@ -150,15 +150,6 @@ class HipsofCobra():
     GK_deriv_mean  = -0.536731
     GK_deriv_std   =  0.239351 # Unc. from (mK/4*pi*F_pi)^2
 
-    # Extract mean and stdev of Gpi0 and GK0 values. 
-    _gsamples = 1000
-    _gpilist  = [self.Gpi0() for i in range(_gsamples)]
-    _gKlist   = [self.GK0()  for i in range(_gsamples)]
-    gpi0mean = np.average(_gpilist)
-    gpi0std  = np.std(_gpilist)
-    gK0mean  = np.average(_gKlist)
-    gK0std   = np.std(_gKlist)
-    
     # Read in C and D functions (canonical Omnes Solutions)
     #   in order to directly compute G form factors. 
     with open('input/hips_c1.txt', 'r') as file:
@@ -247,5 +238,5 @@ class HipsofCobra():
       (self.xi_s+(1.0-Params.gamma)*self.xi_g)*DeltaK0(MeanQ=MeanQ)
 
 
-a = HipsofCobra([1,1,1], 'pi', 'derived')  
+a = HipsofCobra([1,1,1], 'K', 'derived')  
 ic( a.G_sl[1][1][:10] ) 
