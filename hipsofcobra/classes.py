@@ -132,6 +132,13 @@ def thetaK0(MeanQ=False):
 
 class HipsofCobra():
   def __init__(self, clist, Pname, method):
+  # init generates the full set of G form factors 
+  # for each of the iterations included in the Omnes 
+  # files. These are stored in self.G_sl (sl=superlist):
+  #   G_sl[0] = list of s values on which the G values are given
+  #   G_sl[1] = list of iterations of G calculation
+  #     G_sl[1][iter][i] = value of G from the iter-th iteration
+  #                        evaluated at the i-th s value. 
     _npi = 1
     _nK  = np.sqrt(3.0)/2.0
 
