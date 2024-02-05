@@ -34,9 +34,6 @@ def get_input_file(filename):
 def get_results_file(filename):
   return '/'.join([results_path, filename])
 
-
-print(" cwd is ", os.getcwd())
-print(" files in cwd are ", os.listdir())
 assert os.path.isdir(input_path), "Directory 'input' must exist and contain Omnes data."
 if not os.path.isdir(results_path):
   print("  'results' directory didn't exist. Creating 'results'. . . ")
