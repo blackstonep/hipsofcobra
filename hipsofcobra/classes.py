@@ -61,7 +61,7 @@ def GammaPi0(MeanQ=False):
     _meta  = rng.normal( Params.meta, Params.metasig )
     _F0    = rng.normal( Params.F0  , Params.F0sig   )
   
-  return _mpi**2 + ( _mpi**4 / _F0**4 ) * ( 
+  return _mpi**2 + ( _mpi**4 / _F0**2 ) * ( 
     (1.0/32.0/np.pi**2) * (
       (8.0/9.0)+np.log(_mpi**2/_mu**2)- \
         (1.0/9.0)*np.log(_meta**2/_mu**2)
@@ -211,12 +211,12 @@ class HipsofCobra():
     
     self.G_sl = [self.slist, []]   
     for iter in range(number_of_iters):
-      thetapi0_dummy = thetaPi0()
-      thetaK0_dummy = thetaK0()
-      Gpi0_dummy = self.Gpi0()
-      GK0_dummy  = self.GK0()
+      thetapi0_dummy  = thetaPi0()
+      thetaK0_dummy   = thetaK0()
+      Gpi0_dummy      = self.Gpi0()
+      GK0_dummy       = self.GK0()
       Gpi_deriv_dummy = rng.normal( Gpi_deriv_mean, Gpi_deriv_std )
-      GK_deriv_dummy  = rng.normal( GK_deriv_mean, GK_deriv_std )
+      GK_deriv_dummy  = rng.normal( GK_deriv_mean,  GK_deriv_std  )
 
       Qpi0 = _npi*Gpi0_dummy
       QK0  = _nK*GK0_dummy
@@ -341,6 +341,23 @@ class HipsofCobra():
 plist = ['pi', 'K']
 mlist = ['derived', 'direct']
 
+a = HipsofCobra([1,1,1], 'pi', 'derived')
+foo = [a.Gpi0() for i in range(100)] 
+ic(np.mean(foo))
+ic(np.std(foo))
+
+Gamma_list = [GammaPi0() for i in range(100)]
+Delta_list = [DeltaPi0() for i in range(100)]
+theta_list = [thetaPi0() for i in range(100)]
+
+ic( np.mean( Gamma_list ) )
+ic( np.std( Gamma_list ) )
+ic( np.mean( Delta_list ) )
+ic( np.std( Delta_list ) )
+ic( np.mean( theta_list ) )
+ic( np.std( theta_list ) )
+
+# Generate all plots for all Pname and methods 
 for p in plist:
   for m in mlist:
     a = HipsofCobra([1,1,1], p, m)  
