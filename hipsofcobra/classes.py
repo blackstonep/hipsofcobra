@@ -8,7 +8,7 @@ class Params(object):
   alpha   =  0.337848   # alpha strong at the charm mass
   beta    = -0.0293845  # alpha strong beta function
   gamma   = -0.332003   # anomalous dimension of quark mass
-  gf      =  2.336925e-05
+  gf      =  1.1663787e-05
   mu      =  0.547862
   L85     = -0.46e-3
   L85sig  =  0.20e-3
@@ -261,20 +261,20 @@ class HipsofCobra():
     # Method to extract upper- and lower- 1sigma contours of |G_P|, and
     # the values of the branching ratio associated with those. 
     
-    self.G_band_list = []  # Format: [ [svalue, mean, std], ... ]
-    self.br_band_list = [] # Format: [ [svalue, central br, lower br, upper br], ... ]
+    self.G_band_list  = [] # Format: [ [svalue, mean, std], ... ]
+    self.width_band_list = [] # Format: [ [svalue, central width, lower width, upper width], ... ]
     for i in range(self.number_of_inds):
       _s = self.slist[i]
       values_of_G_at_s = [abs(self.G_sl[1][iter][i]) for iter in range(self.number_of_iters)]
       G_mean = np.average( values_of_G_at_s ) 
       G_std  = np.std( values_of_G_at_s ) 
       self.G_band_list.append( [_s, G_mean, G_std] )
-      self.br_band_list.append(
+      self.width_band_list.append(
         [
           _s, 
-          self.G_to_br(G_mean, i), 
-          self.G_to_br(G_mean-G_std, i), 
-          self.G_to_br(G_mean+G_std, i),
+          self.G_to_width(G_mean, i), 
+          self.G_to_width(G_mean-G_std, i), 
+          self.G_to_width(G_mean+G_std, i),
         ] 
       )
 
@@ -291,8 +291,8 @@ class HipsofCobra():
       (self.xi_s+(1.0-Params.gamma)*self.xi_g)*DeltaK0(MeanQ=MeanQ)
 
 
-  # Method to calculate branching ratios from values of G. 
-  def G_to_br(self, gval, s_index):
+  # Method to calculate widths from values of G. 
+  def G_to_width(self, gval, s_index):
     if self.slist[s_index] <= 4*self.daughter_mass**2:
       return 0.0
     fac1 = self.prefactor*Params.gf/(np.sqrt(2*self.slist[s_index])*np.pi)
@@ -338,6 +338,7 @@ class HipsofCobra():
         c=color, alpha=0.5 
       )
     plt.yscale('log')
+    plt.xlabel(r'$s \, [{\rm GeV^2}]$') 
     if self.Pname=='pi':
       plt.title(r'$G_\pi$ Form Factor for clist = '+str(self.clist)+' , method = '+str(self.method))
       plt.ylabel(r'$|G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
@@ -351,9 +352,35 @@ class HipsofCobra():
     plt.savefig(get_results_file('G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
     plt.clf()
  
-
-
-  # Plot branching ratios, including lower- and upper-countours. 
+  # Plot width contours, including lower- and upper-countours. 
+  def plot_width_countours(self, color=None, xlim=None, ylim=None, PrintQ=True):
+    if PrintQ:
+      print("\n  Making plot of widths (contours): ")
+      print("    P = ", self.Pname, ", Method = ", self.method, 
+            ", clist = ", self.clist, " . . . \n")
+    plt.clf()
+    central_list = np.array( [self.width_band_list[i][1] for i in range(self.number_of_inds) ] )
+    lower_list   = np.array( [self.width_band_list[i][2] for i in range(self.number_of_inds) ] )
+    upper_list   = np.array( [self.width_band_list[i][3] for i in range(self.number_of_inds) ] )
+    for foo in [central_list, lower_list, upper_list]:
+      plt.plot( 
+        np.sqrt( self.slist ), foo,
+        c=color, alpha=0.5 
+      )
+    plt.yscale('log')
+    plt.xlabel(r'$m_\phi \, [{\rm GeV}]$') 
+    if self.Pname=='pi':
+      plt.title(r'$\Gamma(\phi \to \pi^+ \pi^-)$ for clist = '+str(self.clist)+' , method = '+str(self.method))
+      plt.ylabel(r'$\Gamma_{\pi^+ \pi^-} \, [{\rm GeV}]$') 
+    if self.Pname=='K':
+      plt.title(r'$\Gamma(\phi \to K^+ K^-)$ for clist = '+str(self.clist)+' , method = '+str(self.method))
+      plt.ylabel(r'$\Gamma_{K^+ K^-} \, [{\rm GeV}]$') 
+    if xlim:
+      plt.xlim(xlim)
+    if ylim:
+      plt.ylim(ylim) 
+    plt.savefig(get_results_file('width'+'_clist='+str(self.clist)+'_'+self.Pname+'_'+self.method+'.pdf')) 
+    plt.clf()
 
 plist = ['pi', 'K']
 mlist = ['derived', 'direct']
@@ -363,4 +390,8 @@ for p in plist:
   for m in mlist:
     a = HipsofCobra([1,1,1], p, m)  
     a.plot_G_countours(color='g', xlim=[0,4])
+    a.plot_width_countours(color='g', xlim=[0,2], ylim=[1e-9, 1e-5])
     a.plot_sl(xlim=[0,4])
+
+
+  ic( Params.gf*(246**2)*np.sqrt(2) )
