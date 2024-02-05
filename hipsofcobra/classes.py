@@ -23,6 +23,25 @@ import os
 from icecream import ic
 import matplotlib.pyplot as plt
 
+# Make sure that cwd is 
+hipsofcobra_path = os.path.dirname( os.path.abspath(__file__) )
+classes_path = os.path.abspath(__file__)
+input_path = '/'.join( (hipsofcobra_path, 'input' ) )
+results_path = '/'.join( (hipsofcobra_path, 'results' ) )
+
+def get_input_file(filename):
+  return '/'.join([input_path, filename])
+def get_results_file(filename):
+  return '/'.join([results_path, filename])
+
+
+print(" cwd is ", os.getcwd())
+print(" files in cwd are ", os.listdir())
+assert os.path.isdir(input_path), "Directory 'input' must exist and contain Omnes data."
+if not os.path.isdir(results_path):
+  print("  'results' directory didn't exist. Creating 'results'. . . ")
+  os.mkdir(results_path)
+
 rng = np.random.default_rng(seed=None)
 
 # Functions for computing s=0 values for all form factors. 
@@ -161,13 +180,13 @@ class HipsofCobra():
 
     # Read in C and D functions (canonical Omnes Solutions)
     #   in order to directly compute G form factors. 
-    with open('input/hips_c1.txt', 'r') as file:
+    with open(get_input_file('hips_c1.txt'), 'r') as file:
       c1_sl = eval(file.read().replace('C', 'c') )
-    with open('input/hips_c2.txt', 'r') as file:
+    with open(get_input_file('hips_c2.txt'), 'r') as file:
       c2_sl = eval(file.read().replace('C', 'c') )
-    with open('input/hips_d1.txt', 'r') as file:
+    with open(get_input_file('hips_d1.txt'), 'r') as file:
       d1_sl = eval(file.read().replace('C', 'c') )
-    with open('input/hips_d2.txt', 'r') as file:
+    with open(get_input_file('hips_d2.txt'), 'r') as file:
       d2_sl = eval(file.read().replace('C', 'c') )
 
     self.slist = c1_sl[0]
@@ -276,7 +295,7 @@ class HipsofCobra():
     plt.clf()
     plt.title(r'$G$ Form Factor for clist = '+str(self.clist)+' , method = '+self.method)
     for iter in range(self.number_of_iters):
-      plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=color, marker='-', s=1, alpha=0.5)
+      plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=color, marker='.', s=1, alpha=0.5)
     plt.yscale('log')
     plt.xlabel(r'$s \, [{\rm GeV^2}]$') 
     if self.Pname=='pi':
@@ -287,7 +306,7 @@ class HipsofCobra():
       plt.xlim(xlim)
     if ylim:
       plt.ylim(ylim) 
-    plt.savefig('results/scatter'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf') 
+    plt.savefig(get_results_file('scatter'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
     plt.clf()
 
   # Plot G form factor, including lower- and upper-countours. 
@@ -315,7 +334,7 @@ class HipsofCobra():
       plt.xlim(xlim)
     if ylim:
       plt.ylim(ylim) 
-    plt.savefig('results/G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf') 
+    plt.savefig(get_results_file('G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
     plt.clf()
  
 
@@ -329,3 +348,4 @@ for p in plist:
   for m in mlist:
     a = HipsofCobra([1,1,1], p, m)  
     a.plot_G_countours(color='g', xlim=[0,4])
+    a.plot_sl(xlim=[0,4])
