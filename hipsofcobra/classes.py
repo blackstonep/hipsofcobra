@@ -163,6 +163,13 @@ class HipsofCobra():
       " Method must be either 'derived' or 'direct'. "
     assert Pname=='pi' or Pname=='K' , \
       " Pname must be either 'pi' or 'K'. "
+    
+    if Pname=="pi": 
+      self.prefactor = 3.0/16.0
+      self.daughter_mass  = Params.mpi
+    else: 
+      self.prefactor = 0.25
+      self.daughter_mass  = Params.mpi
 
     self.clist  = clist
     self.method = method 
@@ -251,15 +258,25 @@ class HipsofCobra():
           for i in range(number_of_inds)]
       self.G_sl[1].append(gvals)
 
-    # Method to extract upper- and lower- 1sigma contours of |G_P|. 
-    # Format: [ [svalue, mean, std], ...]
-    self.unc_band_list = []
+    # Method to extract upper- and lower- 1sigma contours of |G_P|, and
+    # the values of the branching ratio associated with those. 
+    
+    self.G_band_list = []  # Format: [ [svalue, mean, std], ... ]
+    self.br_band_list = [] # Format: [ [svalue, central br, lower br, upper br], ... ]
     for i in range(self.number_of_inds):
       _s = self.slist[i]
       values_of_G_at_s = [abs(self.G_sl[1][iter][i]) for iter in range(self.number_of_iters)]
-      _mean = np.average( values_of_G_at_s ) 
-      _std  = np.std( values_of_G_at_s ) 
-      self.unc_band_list.append( [_s, _mean, _std] )
+      G_mean = np.average( values_of_G_at_s ) 
+      G_std  = np.std( values_of_G_at_s ) 
+      self.G_band_list.append( [_s, G_mean, G_std] )
+      self.br_band_list.append(
+        [
+          _s, 
+          self.G_to_br(G_mean, i), 
+          self.G_to_br(G_mean-G_std, i), 
+          self.G_to_br(G_mean+G_std, i),
+        ] 
+      )
 
   # Functions to sample Gpi and GK, which depend on the 
   # instance-specific couplings and so are worth defining in-class. 
@@ -275,11 +292,11 @@ class HipsofCobra():
 
 
   # Method to calculate branching ratios from values of G. 
-  def G_to_br(self, gval, s_index, daughter_mass, prefactor):
-    if self.slist[s_index] <= 4*daughter_mass**2:
+  def G_to_br(self, gval, s_index):
+    if self.slist[s_index] <= 4*self.daughter_mass**2:
       return 0.0
-    fac1 = prefactor*Params.gf/(np.sqrt(2*self.slist[s_index])*np.pi)
-    fac2 = np.sqrt(1-4*daughter_mass**2/self.slist[s_index])
+    fac1 = self.prefactor*Params.gf/(np.sqrt(2*self.slist[s_index])*np.pi)
+    fac2 = np.sqrt(1-4*self.daughter_mass**2/self.slist[s_index])
     fac3 = abs(gval)**2
     return fac1*fac2*fac3
 
@@ -313,8 +330,8 @@ class HipsofCobra():
       print("    P = ", self.Pname, ", Method = ", self.method, 
             ", clist = ", self.clist, " . . . \n")
     plt.clf()
-    mean_list = np.array( [self.unc_band_list[i][1] for i in range(self.number_of_inds) ] )
-    std_list  = np.array( [self.unc_band_list[i][2] for i in range(self.number_of_inds) ] )
+    mean_list = np.array( [self.G_band_list[i][1] for i in range(self.number_of_inds) ] )
+    std_list  = np.array( [self.G_band_list[i][2] for i in range(self.number_of_inds) ] )
     for uncflag in [0,-1,1]:
       plt.plot( 
         self.slist, mean_list + uncflag*std_list,
@@ -340,22 +357,6 @@ class HipsofCobra():
 
 plist = ['pi', 'K']
 mlist = ['derived', 'direct']
-
-a = HipsofCobra([1,1,1], 'pi', 'derived')
-foo = [a.Gpi0() for i in range(100)] 
-ic(np.mean(foo))
-ic(np.std(foo))
-
-Gamma_list = [GammaPi0() for i in range(100)]
-Delta_list = [DeltaPi0() for i in range(100)]
-theta_list = [thetaPi0() for i in range(100)]
-
-ic( np.mean( Gamma_list ) )
-ic( np.std( Gamma_list ) )
-ic( np.mean( Delta_list ) )
-ic( np.std( Delta_list ) )
-ic( np.mean( theta_list ) )
-ic( np.std( theta_list ) )
 
 # Generate all plots for all Pname and methods 
 for p in plist:
