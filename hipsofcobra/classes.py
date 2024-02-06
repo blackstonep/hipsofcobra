@@ -22,8 +22,9 @@ import sys
 import os 
 from icecream import ic
 import matplotlib.pyplot as plt
+import csv
 
-# Make sure that cwd is 
+# define paths
 hipsofcobra_path = os.path.dirname( os.path.abspath(__file__) )
 classes_path = os.path.abspath(__file__)
 input_path = '/'.join( (hipsofcobra_path, 'input' ) )
@@ -31,8 +32,6 @@ results_path = '/'.join( (hipsofcobra_path, 'results' ) )
 
 def get_input_file(filename):
   return '/'.join([input_path, filename])
-def get_results_file(filename):
-  return '/'.join([results_path, filename])
 
 assert os.path.isdir(input_path), "Directory 'input' must exist and contain Omnes data."
 if not os.path.isdir(results_path):
@@ -177,11 +176,15 @@ class HipsofCobra():
     self.xi_hat = self.clist[0]
     self.xi_s   = self.clist[1]
     self.xi_g   = self.clist[2]*Params.alpha**2/(3.0*np.pi*Params.beta) 
+    self.results_path = '/'.join( (hipsofcobra_path, 'results', 'clist='+str(self.clist) ) )
     Gpi_deriv_mean =  self.xi_g 
     Gpi_deriv_std  =  0.0191309 # Unc. from (mpi/4*pi*F_pi)^2
     GK_deriv_mean  = -0.536731
     GK_deriv_std   =  0.239351 # Unc. from (mK/4*pi*F_pi)^2
 
+    if not os.path.isdir(self.results_path):
+      print("  'results' directory didn't exist. Creating 'results'. . . ")
+      os.mkdir(self.results_path)
     # Read in C and D functions (canonical Omnes Solutions)
     #   in order to directly compute G form factors. 
     with open(get_input_file('hips_c1.txt'), 'r') as file:
@@ -277,6 +280,22 @@ class HipsofCobra():
           self.G_to_width(G_mean+G_std, i),
         ] 
       )
+  def get_results_file(self, filename):
+    return '/'.join([self.results_path, filename])
+  
+  # Function to write width lists out to csv. 
+  def write_widths(self):
+    _outfile_path = '/'.join([self.results_path, 'widths_data_'+'c='+str(self.clist)+'_'+self.Pname+'_method='+self.method+'.csv'])
+    with open(_outfile_path, 'w', newline='') as f:
+      writer = csv.writer(f, delimiter=',') 
+      writer.writerow(['m_phi', 'width_central', 'width_lower', 'width_upper']) 
+      for i in range(self.number_of_inds): 
+        writer.writerow( 
+          [np.sqrt(self.slist[i]), 
+           self.width_band_list[i][1], 
+           self.width_band_list[i][2], 
+           self.width_band_list[i][3]]
+        )
 
   # Functions to sample Gpi and GK, which depend on the 
   # instance-specific couplings and so are worth defining in-class. 
@@ -289,7 +308,6 @@ class HipsofCobra():
     return self.xi_g*thetaK0(MeanQ=MeanQ)-\
       (self.xi_hat+(1.0-Params.gamma)*self.xi_g)*GammaK0(MeanQ=MeanQ)-\
       (self.xi_s+(1.0-Params.gamma)*self.xi_g)*DeltaK0(MeanQ=MeanQ)
-
 
   # Method to calculate widths from values of G. 
   def G_to_width(self, gval, s_index):
@@ -320,7 +338,7 @@ class HipsofCobra():
       plt.xlim(xlim)
     if ylim:
       plt.ylim(ylim) 
-    plt.savefig(get_results_file('scatter'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
+    plt.savefig(self.get_results_file('scatter'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
     if ShowQ:
       plt.show()
     plt.clf()
@@ -351,7 +369,7 @@ class HipsofCobra():
       plt.xlim(xlim)
     if ylim:
       plt.ylim(ylim) 
-    plt.savefig(get_results_file('G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
+    plt.savefig(self.get_results_file('G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
     if ShowQ:
       plt.show()
     plt.clf()
@@ -383,7 +401,7 @@ class HipsofCobra():
       plt.xlim(xlim)
     if ylim:
       plt.ylim(ylim) 
-    plt.savefig(get_results_file('width'+'_clist='+str(self.clist)+'_'+self.Pname+'_'+self.method+'.pdf')) 
+    plt.savefig(self.get_results_file('width'+'_clist='+str(self.clist)+'_'+self.Pname+'_'+self.method+'.pdf')) 
     if ShowQ:
       plt.show()
     plt.clf()
