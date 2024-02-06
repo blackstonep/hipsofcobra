@@ -169,7 +169,7 @@ class HipsofCobra():
       self.daughter_mass  = Params.mpi
     else: 
       self.prefactor = 0.25
-      self.daughter_mass  = Params.mpi
+      self.daughter_mass  = Params.mk
 
     self.clist  = clist
     self.method = method 
@@ -301,7 +301,7 @@ class HipsofCobra():
     return fac1*fac2*fac3
 
   # Method to plot bundle of all the iterations. 
-  def plot_sl(self, color=None, xlim=None, ylim=None, PrintQ=True):
+  def plot_sl(self, color=None, xlim=None, ylim=None, PrintQ=True, ShowQ=True):
     if PrintQ:
       print("\n  Making scatterplot of G form factor (superlist): ")
       print("    P = ", self.Pname, ", Method = ", self.method, 
@@ -321,10 +321,12 @@ class HipsofCobra():
     if ylim:
       plt.ylim(ylim) 
     plt.savefig(get_results_file('scatter'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
+    if ShowQ:
+      plt.show()
     plt.clf()
 
   # Plot G form factor, including lower- and upper-countours. 
-  def plot_G_countours(self, color=None, xlim=None, ylim=None, PrintQ=True):
+  def plot_G_countours(self, color=None, xlim=None, ylim=None, PrintQ=True, ShowQ=True):
     if PrintQ:
       print("\n  Making plot of G form factor (contours): ")
       print("    P = ", self.Pname, ", Method = ", self.method, 
@@ -350,10 +352,12 @@ class HipsofCobra():
     if ylim:
       plt.ylim(ylim) 
     plt.savefig(get_results_file('G_contours'+'_clist='+str(self.clist)+'_G'+self.Pname+'_'+self.method+'.pdf')) 
+    if ShowQ:
+      plt.show()
     plt.clf()
  
   # Plot width contours, including lower- and upper-countours. 
-  def plot_width_countours(self, color=None, xlim=None, ylim=None, PrintQ=True):
+  def plot_width_countours(self, color=None, xlim=None, ylim=None, PrintQ=True, ShowQ=True):
     if PrintQ:
       print("\n  Making plot of widths (contours): ")
       print("    P = ", self.Pname, ", Method = ", self.method, 
@@ -370,18 +374,21 @@ class HipsofCobra():
     plt.yscale('log')
     plt.xlabel(r'$m_\phi \, [{\rm GeV}]$') 
     if self.Pname=='pi':
-      plt.title(r'$\Gamma(\phi \to \pi^+ \pi^-)$ for clist = '+str(self.clist)+' , method = '+str(self.method))
-      plt.ylabel(r'$\Gamma_{\pi^+ \pi^-} \, [{\rm GeV}]$') 
+      plt.title(r'$\Gamma(\phi \to \pi \pi)$ for clist = '+str(self.clist)+' , method = '+str(self.method))
+      plt.ylabel(r'$\Gamma_{\pi \pi} \, [{\rm GeV}]$') 
     if self.Pname=='K':
-      plt.title(r'$\Gamma(\phi \to K^+ K^-)$ for clist = '+str(self.clist)+' , method = '+str(self.method))
-      plt.ylabel(r'$\Gamma_{K^+ K^-} \, [{\rm GeV}]$') 
+      plt.title(r'$\Gamma(\phi \to K K)$ for clist = '+str(self.clist)+' , method = '+str(self.method))
+      plt.ylabel(r'$\Gamma_{K K} \, [{\rm GeV}]$') 
     if xlim:
       plt.xlim(xlim)
     if ylim:
       plt.ylim(ylim) 
     plt.savefig(get_results_file('width'+'_clist='+str(self.clist)+'_'+self.Pname+'_'+self.method+'.pdf')) 
+    if ShowQ:
+      plt.show()
     plt.clf()
 
+'''
 plist = ['pi', 'K']
 mlist = ['derived', 'direct']
 
@@ -393,5 +400,4 @@ for p in plist:
     a.plot_width_countours(color='g', xlim=[0,2], ylim=[1e-9, 1e-5])
     a.plot_sl(xlim=[0,4])
 
-
-  ic( Params.gf*(246**2)*np.sqrt(2) )
+'''
