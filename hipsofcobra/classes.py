@@ -20,7 +20,6 @@ class Params(object):
 import numpy as np
 import sys
 import os 
-from icecream import ic
 import matplotlib.pyplot as plt
 import csv
 
