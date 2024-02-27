@@ -28,7 +28,7 @@ hipsofcobra_path = os.path.dirname( os.path.abspath(__file__) )
 classes_path = os.path.abspath(__file__)
 input_path = '/'.join( (hipsofcobra_path, 'input' ) )
 # results_path = '/'.join( (hipsofcobra_path, 'results' ) )
-results_path = '/'.join( ('./', 'results' ) )
+results_path = '/./results'
 
 def get_input_file(filename):
   return '/'.join([input_path, filename])
@@ -176,7 +176,8 @@ class HipsofCobra():
     self.xi_hat = self.clist[0]
     self.xi_s   = self.clist[1]
     self.xi_g   = self.clist[2]*Params.alpha**2/(3.0*np.pi*Params.beta) 
-    self.results_path = '/'.join( (hipsofcobra_path, 'results', 'clist='+str(self.clist) ) )
+    #self.results_path = '/'.join( (hipsofcobra_path, 'results', 'clist='+str(self.clist) ) )
+    self.results_path = '/'.join( ('./results', 'clist='+str(self.clist) ) )
     Gpi_deriv_mean =  self.xi_g 
     Gpi_deriv_std  =  0.0191309 # Unc. from (mpi/4*pi*F_pi)^2
     GK_deriv_mean  = -0.536731
