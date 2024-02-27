@@ -28,7 +28,7 @@ hipsofcobra_path = os.path.dirname( os.path.abspath(__file__) )
 classes_path = os.path.abspath(__file__)
 input_path = '/'.join( (hipsofcobra_path, 'input' ) )
 # results_path = '/'.join( (hipsofcobra_path, 'results' ) )
-results_path = '/./results'
+results_path = './results'
 
 def get_input_file(filename):
   return '/'.join([input_path, filename])
@@ -184,7 +184,7 @@ class HipsofCobra():
     GK_deriv_std   =  0.239351 # Unc. from (mK/4*pi*F_pi)^2
 
     if not os.path.isdir(self.results_path):
-      print("  'results' directory didn't exist. Creating 'results'. . . ")
+      print("  'results' directory for specific clist didn't exist. Creating 'results'. . . ")
       os.mkdir(self.results_path)
     # Read in C and D functions (canonical Omnes Solutions)
     #   in order to directly compute G form factors. 
