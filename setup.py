@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.2'
+VERSION = '0.0.4'
 DESCRIPTION = 'A package for calculating the branching ratios of a scalar decaying to pi ' + \
               ' and K mesons from a coupled-channel analysis.'
 
@@ -17,6 +17,9 @@ setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    package_data={
+      'hipsofcobra': ['input/*.txt']
+    },
     install_requires=['numpy'],
     keywords=['python', 'physics', 'hep'],
 )

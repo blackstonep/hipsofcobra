@@ -27,7 +27,8 @@ import csv
 hipsofcobra_path = os.path.dirname( os.path.abspath(__file__) )
 classes_path = os.path.abspath(__file__)
 input_path = '/'.join( (hipsofcobra_path, 'input' ) )
-results_path = '/'.join( (hipsofcobra_path, 'results' ) )
+# results_path = '/'.join( (hipsofcobra_path, 'results' ) )
+results_path = '/'.join( ('./', 'results' ) )
 
 def get_input_file(filename):
   return '/'.join([input_path, filename])
