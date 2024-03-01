@@ -105,6 +105,14 @@ def GammaK0(MeanQ=False):
     _meta  = rng.normal( Params.meta, Params.metasig )
     _F0    = rng.normal( Params.F0  , Params.F0sig   )
   
+  return 0.5*_mpi**2 * (
+    1.0+np.log(_meta**2/_mpi**2)/(32*np.pi**2*_F0**2) +\
+    8/_F0**2*((2*_mk**2-_mpi**2)*_l85+4*_mk**2*_l64   +\
+                 _mk**2/(72*np.pi**2)*(1+np.log(_meta**2/_mu**2)) 
+    )
+  )
+ 
+  '''
   return 0.5*_mpi**2+0.5*(_mpi**2/_F0**2)*(
     -_mpi**2/(32.0*np.pi**2)*np.log(_mpi**2/_mu**2)+\
     _meta**2/(32.0*np.pi**2)*np.log(_meta**2/_mu**2)+\
@@ -113,6 +121,7 @@ def GammaK0(MeanQ=False):
     1.0/(72.0*np.pi**2)*(1.0+np.log(_meta**2/_mu**2))+\
     8*_l85+16*_l64
   )
+  '''
 
 def DeltaK0(MeanQ=False): 
   _mu = Params.mu
@@ -131,6 +140,16 @@ def DeltaK0(MeanQ=False):
     _meta  = rng.normal( Params.meta, Params.metasig )
     _F0    = rng.normal( Params.F0  , Params.F0sig   )
   
+  return (_mk**2-0.5*_mpi**2) * (
+    1.0 + _mk**2/_F0**2 * (
+      (1+np.log(_meta**2/_mu**2))/(36*np.pi**2)+8*(_l85+2*_l64) 
+    )
+  ) + \
+  0.5*_mpi**2 * ( 
+    np.log(_mpi**2/_meta**2)/(32*np.pi**2*_F0**2)-8/_F0**2*(_mk**2-_mpi**2)*_l85 
+  )
+
+  '''
   return (_mk**2-0.5*_mpi**2)+0.5*_mpi**2/_F0**2*(
     _mpi**2/(32.0*np.pi**2)*np.log(_mpi**2/_mu**2)-\
     _meta**2/(32.0*np.pi**2)*np.log(_meta**2/_mu**2)-\
@@ -139,6 +158,7 @@ def DeltaK0(MeanQ=False):
     1.0/(36.0*np.pi**2)*(1.0+np.log(_meta**2/_mu**2))+\
     8*_l85+16*_l64
   )
+  '''
 
 def thetaPi0(MeanQ=False):
   return 2*GammaPi0(MeanQ=MeanQ)
@@ -406,17 +426,3 @@ class HipsofCobra():
     if ShowQ:
       plt.show()
     plt.clf()
-
-'''
-plist = ['pi', 'K']
-mlist = ['derived', 'direct']
-
-# Generate all plots for all Pname and methods 
-for p in plist:
-  for m in mlist:
-    a = HipsofCobra([1,1,1], p, m)  
-    a.plot_G_countours(color='g', xlim=[0,4])
-    a.plot_width_countours(color='g', xlim=[0,2], ylim=[1e-9, 1e-5])
-    a.plot_sl(xlim=[0,4])
-
-'''
