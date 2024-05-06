@@ -1,5 +1,5 @@
 ## HIPSOFCOBRA
-A python package to compute the HIggs Portal Scalar OFf-diagonal COupling Branching RAtios. 
+A python package to compute the HIggs Portal Scalar Off-Flavor COupling Branching RAtios. 
 
 ## Documentation
 
@@ -23,7 +23,7 @@ Maintainer:
 
 - Patrick Blackstone (@blackstonep)
 
-Contributors (in alphabetical order):
+Contributors:
 
 - Patrick Blackstone
 - Jaume Tarrús Castellà
