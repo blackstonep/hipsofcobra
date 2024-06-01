@@ -16,6 +16,7 @@ class Params(object):
   L64sig  =  0.17e-3
   F0      =  0.0803
   F0sig   =  0.0006
+  vev     =  246.0      # Higgs vev
 
 import numpy as np
 import sys
@@ -193,9 +194,9 @@ class HipsofCobra():
     self.clist  = clist
     self.method = method 
     self.Pname  = Pname
-    self.xi_hat = self.clist[0]
-    self.xi_s   = self.clist[1]
-    self.xi_g   = self.clist[2]*Params.alpha**2/(3.0*np.pi*Params.beta) 
+    self.xi_hat = self.clist[0] / Params.vev
+    self.xi_s   = self.clist[1] / Params.vev
+    self.xi_g   = self.clist[2]*Params.alpha**2/(3.0*np.pi*Params.vev*Params.beta) 
     #self.results_path = '/'.join( (hipsofcobra_path, 'results', 'clist='+str(self.clist) ) )
     self.results_path = '/'.join( ('./results', 'clist='+str(self.clist) ) )
     Gpi_deriv_mean =  self.xi_g 
@@ -334,7 +335,8 @@ class HipsofCobra():
   def G_to_width(self, gval, s_index):
     if self.slist[s_index] <= 4*self.daughter_mass**2:
       return 0.0
-    fac1 = self.prefactor*Params.gf/(np.sqrt(2*self.slist[s_index])*np.pi)
+    # Remember that v_W is included in the definition of G. 
+    fac1 = self.prefactor/(np.sqrt(self.slist[s_index])*np.pi)
     fac2 = np.sqrt(1-4*self.daughter_mass**2/self.slist[s_index])
     fac3 = abs(gval)**2
     return fac1*fac2*fac3
