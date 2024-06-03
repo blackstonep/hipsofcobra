@@ -350,13 +350,14 @@ class HipsofCobra():
     plt.clf()
     plt.title(r'$G$ Form Factor for clist = '+str(self.clist)+' , method = '+self.method)
     for iter in range(self.number_of_iters):
-      plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=color, marker='.', s=1, alpha=0.5)
+      #plt.scatter( self.slist, list(map(abs, self.G_sl[1][iter])), c=color, marker='.', s=1, alpha=0.5)
+      plt.scatter( self.slist, [ Params.vev*abs(g) for g in self.G_sl[1][iter] ] , c=color, marker='.', s=1, alpha=0.5)
     plt.yscale('log')
     plt.xlabel(r'$s \, [{\rm GeV^2}]$') 
     if self.Pname=='pi':
-      plt.ylabel(r'$|G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
+      plt.ylabel(r'$v_W |G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
     if self.Pname=='K':
-      plt.ylabel(r'$|G_K| \, [{\rm GeV^2}]$, '+self.method) 
+      plt.ylabel(r'$v_W |G_K| \, [{\rm GeV^2}]$, '+self.method) 
     if xlim:
       plt.xlim(xlim)
     if ylim:
@@ -373,8 +374,8 @@ class HipsofCobra():
       print("    P = ", self.Pname, ", Method = ", self.method, 
             ", clist = ", self.clist, " . . . \n")
     plt.clf()
-    mean_list = np.array( [self.G_band_list[i][1] for i in range(self.number_of_inds) ] )
-    std_list  = np.array( [self.G_band_list[i][2] for i in range(self.number_of_inds) ] )
+    mean_list = np.array( [Params.vev*self.G_band_list[i][1] for i in range(self.number_of_inds) ] )
+    std_list  = np.array( [Params.vev*self.G_band_list[i][2] for i in range(self.number_of_inds) ] )
     for uncflag in [0,-1,1]:
       plt.plot( 
         self.slist, mean_list + uncflag*std_list,
@@ -384,10 +385,10 @@ class HipsofCobra():
     plt.xlabel(r'$s \, [{\rm GeV^2}]$') 
     if self.Pname=='pi':
       plt.title(r'$G_\pi$ Form Factor for clist = '+str(self.clist)+' , method = '+str(self.method))
-      plt.ylabel(r'$|G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
+      plt.ylabel(r'$v_W |G_\pi| \, [{\rm GeV^2}]$, '+self.method) 
     if self.Pname=='K':
       plt.title(r'$G_K$ Form Factor for clist = '+str(self.clist)+' , method = '+str(self.method))
-      plt.ylabel(r'$|G_K| \, [{\rm GeV^2}]$, '+self.method) 
+      plt.ylabel(r'$v_W |G_K| \, [{\rm GeV^2}]$, '+self.method) 
     if xlim:
       plt.xlim(xlim)
     if ylim:
