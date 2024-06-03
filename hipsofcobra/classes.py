@@ -341,6 +341,9 @@ class HipsofCobra():
     fac3 = abs(gval)**2
     return fac1*fac2*fac3
 
+  # Method to calculate widths of decays to leptons. 
+  # def lepton_width()
+
   # Method to plot bundle of all the iterations. 
   def plot_sl(self, color=None, xlim=None, ylim=None, PrintQ=True, ShowQ=True):
     if PrintQ:
