@@ -200,9 +200,9 @@ class HipsofCobra():
     #self.results_path = '/'.join( (hipsofcobra_path, 'results', 'clist='+str(self.clist) ) )
     self.results_path = '/'.join( ('./results', 'clist='+str(self.clist) ) )
     Gpi_deriv_mean =  self.xi_g 
-    Gpi_deriv_std  =  0.0191309 # Unc. from (mpi/4*pi*F_pi)^2
-    GK_deriv_mean  = -0.536731
-    GK_deriv_std   =  0.239351 # Unc. from (mK/4*pi*F_pi)^2
+    Gpi_deriv_std  =  abs(Gpi_deriv_mean)*0.0191309 # Unc. from (mpi/4*pi*F_pi)^2
+    GK_deriv_mean  = -0.536731 / Params.vev
+    GK_deriv_std   =  abs(GK_deriv_mean)*0.239351 # Unc. from (mK/4*pi*F_pi)^2
 
     if not os.path.isdir(self.results_path):
       print("  'results' directory for specific clist didn't exist. Creating 'results'. . . ")
