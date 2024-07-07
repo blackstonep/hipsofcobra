@@ -179,8 +179,8 @@ class HipsofCobra():
     _npi = 1
     _nK  = np.sqrt(3.0)/2.0
 
-    assert method=='derived' or method=='direct' , \
-      " Method must be either 'derived' or 'direct'. "
+    assert method=='DGL' or method=='BTPZ' , \
+      " Method must be either 'DGL' or 'BTPZ'. "
     assert Pname=='pi' or Pname=='K' , \
       " Pname must be either 'pi' or 'K'. "
     
@@ -252,7 +252,7 @@ class HipsofCobra():
 
       Qpi0 = _npi*Gpi0_dummy
       QK0  = _nK*GK0_dummy
-      if self.method=='derived':
+      if self.method=='DGL':
         Qpi1 = _npi*Gpi_deriv_dummy-\
                   self.xi_g*(
                     _npi*thetapi0_dummy*c1_deriv[iter]+\
