@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.7'
+VERSION = '0.0.8'
 DESCRIPTION = 'A package for calculating the branching ratios of a scalar decaying to pi ' + \
               ' and K mesons from a coupled-channel analysis.'
 
